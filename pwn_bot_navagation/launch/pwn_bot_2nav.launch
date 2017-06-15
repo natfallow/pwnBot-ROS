@@ -1,0 +1,47 @@
+<launch>
+	<!--Sensor setup-->
+	<node pkg="lms1xx" name="lms1xx" type="LMS1xx_node" output="screen">
+		<param name="host" value="192.168.0.43"/>
+	</node>
+	
+
+
+	<!--Static transform setup-->
+	<node pkg="tf" type="static_transform_publisher" name="base_frame_2_laser_link" args="0.18 0 0 0 0 0 /base_link /laser 100"/>
+	
+
+	<!--Hector Slam setup-->
+  	<node pkg="hector_mapping" type="hector_mapping" name="hector_mapping" output="screen">
+    		<param name="scan_topic" value="scan" />
+    		<param name="base_frame" value="base_link" />
+    		<param name="output_timing" value="false"/>
+    		<param name="use_tf_scan_transformation" value="true"/>
+    		<param name="use_tf_pose_start_estimate" value="false"/>
+		<param name="map_size" value="4096"/>
+    		<param name="map_pub_period" value="1.0"/>
+    		<param name="laser_z_min_value" value = "-0.3"/>
+    		<param name="update_factor_free" value="0.3"/>
+    		<param name="map_resolution" value="0.05"/>
+    		<param name="map_start_x" value="0.5"/>
+    		<param name="map_start_y" value="0.5"/>
+    		<param name="map_multi_res_levels" value="1"/>
+  	</node>
+  
+	<param name="hector_mapping/odom_frame" value="odom"/>
+  	<param name="pub_map_odom_transform" value="true"/>
+	<node pkg="tf" type="static_transform_publisher" name="blink_bframe_broadcaster" args="0 0 0 0 0 0 /base_frame /base_link 100" />
+	<node pkg="tf" type="static_transform_publisher" name="odom_bframe_broadcaster" args="0 0 0 0 0 0 /odom /base_frame 100" />
+
+	<!-- Move base and nav stack setup-->
+	 <node pkg="move_base" type="move_base" respawn="false" name="move_base_node" output="screen">
+        	<remap from="cmd_vel" to="cmd_vel" />
+    		<rosparam file="$(find pwn_bot_navagation)/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    		<rosparam file="$(find pwn_bot_navagation)/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    		<rosparam file="$(find pwn_bot_navagation)/local_costmap_params.yaml" command="load" />
+    		<rosparam file="$(find pwn_bot_navagation)/global_costmap_params.yaml" command="load" />
+    		<rosparam file="$(find pwn_bot_navagation)/base_local_planner_params.yaml" command="load" />
+  	</node>
+
+	<!--hardware interface for pwn_bot-->
+	<include file="$(find pwn_bot_hardware)/launch/standard_config.launch"/>
+</launch>

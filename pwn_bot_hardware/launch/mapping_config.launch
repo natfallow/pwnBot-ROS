@@ -1,0 +1,14 @@
+<launch>
+  
+
+<node pkg="rosserial_python" type="serial_node.py" name="motorData" args="_port:=/dev/ttyACM0" />
+
+<node pkg="pwn_bot_hardware" type="hwd_int_joy" name="hwd_int_joy" output="screen"/>
+<node pkg="lms1xx" name="lms1xx" type="LMS1xx_node" output="screen">
+	<param name="host" value="192.168.0.43"/>
+</node>
+
+<include file="$(find hector_slam_example)/launch/hector_hokuyo.launch"/>
+
+
+</launch>
