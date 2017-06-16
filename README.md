@@ -37,7 +37,7 @@ There are 3 LEDs on the power PCB that indicate the presence on supply rails.
 
 The motor drivers are connected though an emergency stop relay. This can be actuated using the toggle switch on the side of the robot. For this relay to function there must be regulated 5V on the 5V rails on this PCB. The NUC and the LiDAR are powered off the 12V rail from the regulator. 
 
-The Arduino PCB provides PWM and PTG(Pull to Ground) outputs for the motor drivers. The PWM control provides speed control while the PTG outputs provide direction and control. The PTG controls are completed with external MOSFETs to protect the Arduino from voltage transients.  
+The Arduino PCB provides PWM and PTG(Pull to Ground) outputs for the motor drivers. The PWM control provides speed control while the PTG outputs provide direction and breaking control. The PTG controls are completed with external MOSFETs to protect the Arduino from voltage transients.  
 
 The Arduino shield also provides a header to link to the power PCB for voltage monitoring and button control with the other external button. A header is also included so the mouse sensor can be connected to the SPI and interrupt pins. 
 
@@ -53,10 +53,12 @@ The Arduino shield also provides a header to link to the power PCB for voltage m
 
 ## Dependices
 1. All the dependices should be on the NUC allready, if not copy this repo into the src folder of your catkin_ws
+
 ...If adding files to new NUC you will need to run `cd ~/catkin_ws` and `catkin_make` then `source devel/setup.bash` 
-2. If the arduino does no0t have the correct code on it, you will have to upload it (Code is in `arduino` folder) 
+2. If the arduino does not have the correct code on it, you will have to upload it (Code is in `arduino` folder)
+
 ...You make need to make the libraies for the upload to work, find out how [HERE](http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup)
-3. On another Ubuntu 16 machine you will need to [install ROS](http://wiki.ros.org/kinetic/Installation/Ubuntu)desktop-full
+3. On another Ubuntu 16 machine you will need to [install ROS](http://wiki.ros.org/kinetic/Installation/Ubuntu) desktop-full
 4. Install [joy](http://wiki.ros.org/joy) on the local machine with `sudo apt-get install ros-kinetic-joy`
 
 ## ROS IP setup
@@ -67,7 +69,7 @@ To run ROS with an external machine you need to setup the `ROS_MASTER_URI` and `
 3. Add/change the line `export ROS_IP=*NUC IP Address` and save/close the file
 4. On the local machine `nano ~/.bashrc` and scroll to the bottom of the file
 5. Add/change the line `export ROS_MASTER_URI=http://*NUC IP Address*:11311`
-6. Add/change the line `export ROS_IP=*Local IP Address` and save/close the file
+6. Add/change the line `export ROS_IP=*Local IP Address*` and save/close the file
 7. Restart both terminal windows for the changes to take effect
 
 
@@ -78,7 +80,7 @@ To run ROS with an external machine you need to setup the `ROS_MASTER_URI` and `
 * The battery voltage monitoring is on the wrong side of the relay
 * The connector pinout between the Arduino PCB and the power PCB is not the same.  
 
-## work to be done
+## Work to be done
 * Integrate the odom into ROS
 * Tune navigation stack
 * Add destructor to stop robot when hwd_init_joy_override is terminated
