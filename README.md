@@ -52,10 +52,10 @@ The Arduino shield also provides a header to link to the power PCB for voltage m
 * [M4-ATX](http://www.mini-box.com/M4-ATX?sc=8&category=981) Automotive DC-DC Power Supply
 
 ## Dependices
-1. All the dependices should be on the NUC allready, if not copy this repo into the src folder of your catkin_ws
+1. All the dependices should be on the NUC allready, if not copy this repo into the src folder of your catkin_ws 
 
 ...If adding files to new NUC you will need to run `cd ~/catkin_ws` and `catkin_make` then `source devel/setup.bash` 
-2. If the arduino does not have the correct code on it, you will have to upload it (Code is in `arduino` folder)
+2. If the arduino does not have the correct code on it, you will have to upload it (Code is in `arduino` folder) 
 
 ...You make need to make the libraies for the upload to work, find out how [HERE](http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup)
 3. On another Ubuntu 16 machine you will need to [install ROS](http://wiki.ros.org/kinetic/Installation/Ubuntu) desktop-full
