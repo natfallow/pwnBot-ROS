@@ -20,7 +20,7 @@
 #define badDooDoo 10.5
 
 ros::Publisher pub;
-ros::Subscriber joy_sub;
+ros::Subscriber keyboard_sub ;
 
 bool voltageGood=true;
 
@@ -68,7 +68,7 @@ float biggestAmp(float a, float b){
 	}
 }
 
-void joyCallback(const sensor_msgs::Joy& joy){
+/*void joyCallback(const sensor_msgs::Joy& joy){
 	double z_scale =0.9;
 	double x_scale = 0.38;
 	double y_scale = 0.38;
@@ -82,76 +82,75 @@ void joyCallback(const sensor_msgs::Joy& joy){
 		button=false;
 	}
 	streamCombiner();
-}
+}*/
 
 float xVelCmd;
 float yVelCmd;
 float zVelCmd;
 
-
-void cmdVel_cb(const geometry_msgs::Twist& vel){
-		xVelCmd=vel.linear.x;
+/* callback function for SLAM subscriber */
+/*void cmdVel_cb(const geometry_msgs::Twist& vel){
+		xVelCmd=  vel.linear.x;
 		yVelCmd = vel.linear.y;
 		zVelCmd = vel.angular.z;	
 		streamCombiner();	
+}*/
+
+
+/* callback function for keyboard subscriber */
+void controlManualCallback(const geometry_msgs::Twist& vel){
+	xVelCmd = vel.linear.x;
+	yVelCmd = vel.linear.y;
+	zVelCmd = vel.angular.z;
+	streamCombiner();
 }
 
 
-/* Takes the /cmd_vel velocitys and joystick velocotys and publishes the 'winning' msg to the motors are pwm and directions bits.*/
+/* Takes the /cmd_vel velocitys and velocities from manual control and publishes the 'winning' msg to the motors as pwm and directions bits.*/
 void streamCombiner(){
-		pwn_bot_hardware::motors msg; // The message to be sent to the motors on the arduino
-		msg.header.stamp = ros::Time::now();
-		msg.header.frame_id = "/world";
-		
-		float xvel;
-		float yvel;
-		float thetavel;
-		if(button){
-			xvel=xVelJoy;
-			yvel = yVelJoy;
-			thetavel = zVelJoy;
-		}
-		else{
-			xvel=xVelCmd;
-			yvel=yVelCmd;
-			thetavel=zVelCmd;	
-		}
+	pwn_bot_hardware::motors msg; // The message to be sent to the motors on the arduino
+	msg.header.stamp = ros::Time::now();
+	msg.header.frame_id = "/world";
+	
+	float xvel;
+	float yvel;
+	float thetavel;
+	if(button){
+		xvel=xVelJoy;
+		yvel = yVelJoy;
+		thetavel = zVelJoy;
+	}
+	else{
+		xvel=xVelCmd;
+		yvel=yVelCmd;
+		thetavel=zVelCmd;	
+	}
 
-		int scaledX = mapX(xvel);
-		int scaledY = mapY(-yvel);
-		int scaledT = mapT(-thetavel);
-		ROS_INFO("Scaled PWMs X: %d  Y: %d Z:%d", scaledX, scaledY, scaledT); 
-		int speed1 = scaledX + scaledT + scaledY; //front left
-		int speed2 = scaledX+scaledT-scaledY;//rear Left
-		int speed3 = scaledX -scaledT-scaledY; //Front right
-		int speed4 = scaledX-scaledT+scaledY; //rear right
-		//front left motor
-		msg.speed1 = std::min(abs(0.9*speed1),229);
-		msg.dir1 = sign(speed1);
-		//rear left motor
-		msg.speed2 = std::min(abs(0.9*speed2),229);
-		msg.dir2 = sign(speed2);
-		//front right
-		msg.speed3 = std::min(abs(speed3),255);
-		msg.dir3 = sign(speed3);
-		//rear right
-		msg.speed4 = std::min(abs(speed4),255);
-		msg.dir4 = sign(speed4);
-		pub.publish(msg); // Publish the mesage to the arduino
-
-
+	int scaledX = mapX(xvel);
+	int scaledY = mapY(-yvel);
+	int scaledT = mapT(-thetavel);
+	ROS_INFO("Scaled PWMs X: %d  Y: %d Z:%d", scaledX, scaledY, scaledT); 
+	int speed1 = scaledX + scaledT + scaledY; //front left
+	int speed2 = scaledX + scaledT - scaledY;//rear Left
+	int speed3 = scaledX - scaledT - scaledY; //Front right
+	int speed4 = scaledX - scaledT + scaledY; //rear right
+	//front left motor
+	msg.speed1 = std::min(abs(0.9*speed1),229);
+	msg.dir1 = sign(speed1);
+	//rear left motor
+	msg.speed2 = std::min(abs(0.9*speed2),229);
+	msg.dir2 = sign(speed2);
+	//front right
+	msg.speed3 = std::min(abs(speed3),255);
+	msg.dir3 = sign(speed3);
+	//rear right
+	msg.speed4 = std::min(abs(speed4),255);
+	msg.dir4 = sign(speed4);
+	pub.publish(msg); // Publish the mesage to the arduino
 }
-
-
-
-
-
 
 /*
 void hardwareDiag_cb(const pwn_bot_hardware::hardware_diag_msg& diagData){
-	
-	
-	
 	int adc = diagData.adcVal;
 	float adcVolt = adc*(5.0/1024); //calulate the adc voltage from its reading
 	
@@ -166,8 +165,7 @@ void hardwareDiag_cb(const pwn_bot_hardware::hardware_diag_msg& diagData){
 
 	if(batVolt<badDooDoo){
 		ROS_ERROR("Batery Voltage Dangrously Low: Shutting down NUC");
-	}
-	
+	}	
 }
 */
 
@@ -176,12 +174,14 @@ int main(int argc,char **argv){
 	ros::init(argc,argv, "pwn_bot_hardware");
 	ros::NodeHandle nh;
 
+	// publish motor data to arduino
 	pub = nh.advertise<pwn_bot_hardware::motors>("motorData",10);
-	//ros::Subscriber diag = nh.subscribe("hardware_diag",10,hardwareDiag_cb);
 	
-	ros::Subscriber sub = nh.subscribe("cmd_vel",10, cmdVel_cb);
-	joy_sub = nh.subscribe("joy", 10, joyCallback);
+	// subscribe to autonomous control
+	//ros::Subscriber sub = nh.subscribe("cmd_vel",10, cmdVel_cb);
 
+	// subscribe to manual controls through keyboard
+	keyboard_sub = nh.subscribe("controlManual", 10, controlManualCallback);
 	
 	ros::spin();
 
