@@ -1,10 +1,20 @@
 # pwnBot-ROS
-The ROS code and launch files needed to run pwnBot for ECEN430 in 2017, included in the 
+The ROS code and launch files needed to run pwnBot for ECEN430 in 2018, included in the 
 hardware directory are the two custom PCBS used for power management and the Arduino interface. 
 
 pwnBot uses HECTOR SLAM and the navigation stack to navigate and create a map of an unknown environment. The joystick can be used to override the navigation stack to prevent crashes or move the robot manually.  
 
-## Usage 
+## Remote Control (to be updated with _actual_ map/nav setup)
+
+1. `roscore`. If setup correctly, should throw error complaining about not being local `ROS_MASTER_URI`. This is a feature, not a bug. 
+2. `Rviz`. ignore for now.
+3. ssh into NUC (do this for each new command from here) and `roscore`.
+4. `roslaunch pwn_bot_hardware standard_config.launch`
+5. `rosrun teleop_twist_keyboard teleop_twist_keyboard.py`. Congrats, you can now have fun driving it around.
+6. `roslaunch hec_test hector_mapping.launch`
+7. Rviz should now be able to subscribe to map and give lovely picture.
+
+## Usage (legacy)
 1. Install dependences
 2. Setup ROS IPs
 3. SHH into the NUC with username techies
@@ -26,9 +36,9 @@ The joystick can be used to override the navigation stack to prevent crashes or 
 Both joysticks can be used simultaneously to allow movement in all 3 axis of freedom. 
 
 ## Hardware 
-There is two PCBS on board pwnBot one providing power dissolution and one providing control for the motor drivers. Altium files and schematics for these PCBS can be found in the `Hardware` file of this repo. 
+There are two PCBS on board pwnBot: one for power distribution and one providing control for the motor drivers. Altium files and schematics for these PCBS can be found in the `Hardware` file of this repo. 
 
-The power distribution PCB can take 10 to 30V these limits are set by the regulator and the motor drivers. The power supply must be able to supply a steady current of 4.5 amps in order to run all components. For testing a 3 cell (11.1V) 8000mAh LiPo was used. 
+The power distribution PCB can take 10 to 30V. these limits are set by the regulator and the motor drivers. The power supply must be able to supply a steady current of 4.5 amps in order to run all components. For testing a 3 cell (11.1V) 8000mAh LiPo was used. 
 
 There are 3 LEDs on the power PCB that indicate the presence on supply rails.
 * RED: 5V
