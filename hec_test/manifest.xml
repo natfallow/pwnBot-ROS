@@ -1,0 +1,17 @@
+<package>
+  <description brief="hec_test">
+
+     hec_test
+
+  </description>
+  <author>techies</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/hec_test</url>
+  <depend package="std_msgs"/>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+
+</package>
+
+
