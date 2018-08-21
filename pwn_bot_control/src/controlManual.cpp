@@ -8,7 +8,7 @@
 #define maxVelY 0.38
 #define maxVelX  0.38
 #define maxVelT 1.5
-#define maxVelFactor 0.1
+#define maxVelFactor 0.4
 
 geometry_msgs::Twist controlManual;
 

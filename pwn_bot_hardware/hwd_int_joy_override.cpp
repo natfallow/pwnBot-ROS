@@ -181,7 +181,7 @@ int main(int argc,char **argv){
 	//ros::Subscriber sub = nh.subscribe("cmd_vel",10, cmdVel_cb);
 
 	// subscribe to manual controls through keyboard
-	keyboard_sub = nh.subscribe("controlManual", 10, controlManualCallback);
+	keyboard_sub = nh.subscribe("cmd_vel", 10, controlManualCallback);
 	
 	ros::spin();
 
