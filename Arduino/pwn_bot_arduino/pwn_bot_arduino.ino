@@ -5,7 +5,8 @@
  #include <WProgram.h>
 #endif
 
-//#include <Servo.h> 
+#include <Servo.h> 
+
 #include <ros.h>
 #include <std_msgs/UInt16.h>
 #include <pwn_bot_hardware/motors.h>
@@ -33,10 +34,11 @@
 #define startPin A0
 #define ADCvoltage A1
 
+#define US_ServoCtrl 7   //ultrasonic pivot servo 
 
+Servo ultraServo;
 
 ros::NodeHandle  nh;
-
 
 void servo_cb( const pwn_bot_hardware::motors& cmd_msg){
   
@@ -64,10 +66,11 @@ ros::Subscriber<pwn_bot_hardware::motors> sub("motorData", servo_cb);
 
 void setup(){
   definePins();
-
+  
   nh.initNode();
   nh.subscribe(sub);
-  
+
+  ultraServo.attach(US_ServoCtrl);
 }
 
 void loop(){
