@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<launch>
+
+  <master auto="start"/>
+
+  <!-- Map server -->
+  <arg name="map_file" default="$(find mybot_navigation)/maps/test_map.yaml"/>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+  <!-- Place map frame at odometry frame -->
+  <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster"
+      args="0 0 0 0 0 0 map odom 100"/>
+
+  <!--Sensor setup-->
+    <node pkg="urg_node" name="urg_node" type="urg_node" output="screen">
+	<param name="serial_port"  value="/dev/ttyACM1"/>
+    </node>
+	
+  <!--Static transform setup-->
+  <node pkg="tf" type="static_transform_publisher" name="base_frame_2_laser_link" args="0.18 0 0 0 0 0 /base_link /laser 100"/>
+
+
+  <!--- Run gmapping -->
+  <node pkg="gmapping" name="slam_gmapping" type="slam_gmapping" output="screen">
+    <param name="delta" value="0.01"/>
+    <param name="xmin" value="-20"/>
+    <param name="xmax" value="20"/>
+    <param name="ymin" value="-20"/>
+    <param name="ymax" value="20"/>
+    <remap from="scan_topic" to="scan"/>
+    <param name="base_frame" value="chassis" />
+
+    <param name="linearUpdate" value="0.5"/>
+    <param name="angularUpdate" value="0.436"/>
+    <param name="temporalUpdate" value="-1.0"/>
+    <param name="resampleThreshold" value="0.5"/>
+    <param name="particles" value="80"/>
+
+  </node>
+	
+
+  	<param name="pub_map_odom_transform" value="true"/>
+	<node pkg="tf" type="static_transform_publisher" name="blink_bframe_broadcaster" args="0 0 0 0 0 0 /base_frame /base_link 100" />
+	<node pkg="tf" type="static_transform_publisher" name="odom_bframe_broadcaster" args="0 0 0 0 0 0 /odom /base_frame 100" />
+
+
+  <!-- Localization -->
+  <node pkg="amcl" type="amcl" name="amcl" output="screen">
+    <!--remap from="scan" to="mybot/laser/scan"/-->
+    <!--param name="odom_frame_id" value="odom"/-->
+    <!--param name="odom_model_type" value="diff-corrected"/-->
+    <!--param name="base_frame_id" value="chassis"/-->
+    <!--param name="update_min_d" value="0.5"/-->
+    <!--param name="update_min_a" value="1.0"/-->
+  </node>
+  <!--include file="$(find amcl)/examples/amcl_omni.launch"/-->
+
+
+  <!-- Move base and nav stack setup-->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base_node" output="screen">
+    <remap from="cmd_vel" to="cmd_vel"/>
+    <remap from="odom" to="odom"/>
+    <remap from="scan" to="mybot/laser/scan"/>
+    <param name="move_base/DWAPlannerROS/yaw_goal_tolerance" value="1.0"/>
+    <param name="move_base/DWAPlannerROS/xy_goal_tolerance" value="1.0"/>
+    		<rosparam file="$(find pwn_bot_navagation)/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    		<rosparam file="$(find pwn_bot_navagation)/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    		<rosparam file="$(find pwn_bot_navagation)/local_costmap_params.yaml" command="load" />
+    		<rosparam file="$(find pwn_bot_navagation)/global_costmap_params.yaml" command="load" />
+    		<rosparam file="$(find pwn_bot_navagation)/base_local_planner_params.yaml" command="load" />
+  	</node>
+
+	<!--hardware interface for pwn_bot-->
+	<include file="$(find pwn_bot_hardware)/launch/standard_config.launch"/>
+</launch>
